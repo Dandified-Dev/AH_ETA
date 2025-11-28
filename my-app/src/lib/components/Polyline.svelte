@@ -29,7 +29,7 @@
             .map(coord => coord.join(','))
             .join(';');
 
-        const url = `http://router.project-osrm.org/route/v1/car/${coordinatesStr}?overview=full&geometries=geojson`;
+        const url = `https://router.project-osrm.org/route/v1/car/${coordinatesStr}?overview=full&geometries=geojson`;
 
         try {
             const response = await fetch(url);      
