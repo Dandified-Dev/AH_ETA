@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { onMount, onDestroy, getContext, setContext } from 'svelte';
+    import { onDestroy, getContext, setContext } from 'svelte';
     import L from 'leaflet';
 
-    const { latLngList, weatherState} = $props();
+    const { latLngList, weatherState } = $props();
 
     let polyline = $state<L.Polyline | undefined>(undefined);
     let polylineElement: HTMLDivElement;
@@ -11,22 +11,27 @@
     const map = getMap();
 
     setContext('layer', {
-        // L.Polyline inherits from L.Layer
         getLayer: () => polyline
     });
 
+    function getColor(intensity: number) {
+        if (intensity > 60) return '#ef4444'; 
+        if (intensity > 20) return '#f97316'; 
+        return '#22c55e'; 
+    }
+
     async function getRouteData() {
-        let coordinates = latLngList.map((coord) => {
+        if (!latLngList || latLngList.length === 0) return [];
+
+        let coordinates = latLngList.map((coord: any) => {
             if (Array.isArray(coord)) {
-                // coord is [lat, lng] → reverse to [lng, lat]
-                return [coord[1], coord[0]];
+                return [coord[1], coord[0]]; // [lat, lng] -> [lng, lat]
             }
-            // coord is LatLngLiteral → convert to array
             return [coord.lng, coord.lat];
         });
 
         let coordinatesStr = coordinates
-            .map(coord => coord.join(','))
+            .map((coord: any) => coord.join(','))
             .join(';');
 
         const url = `https://router.project-osrm.org/route/v1/car/${coordinatesStr}?overview=full&geometries=geojson`;
@@ -35,28 +40,51 @@
             const response = await fetch(url);      
             const data = await response.json();
             
+            if (!data.routes || data.routes.length === 0) return [];
 
-            // coord is [lng, lat] → reverse to [lat, lng]
-            const routeCoordinates = data.routes[0].geometry.coordinates.map((coord: number[]) => [coord[1], coord[0]]);
-
-          return routeCoordinates;
+            // GeoJSON is [lng, lat], Leaflet wants [lat, lng], so reverse
+            return data.routes[0].geometry.coordinates.map((coord: number[]) => [coord[1], coord[0]]);
         } catch (error) {
-          console.error("Route ophalen mislukt:", error);
-          return [];
+            console.error("Route ophalen mislukt:", error);
+            return [];
         }
     }
 
-    onMount(async () => {
-        if (map) {
-            const coords = await getRouteData();
-            console.log(weatherState);
-            
-            
-            polyline = L.polyline(coords, {
-                color: weatherState > 60 ? 'darkblue' : weatherState > 20 ? 'blue' : 'green',
-                weight: 4,
-                opacity: 0.7,
-            }).addTo(map);
+    async function updateRoute() {
+        if (!map) return;
+
+        const coords = await getRouteData();
+        if (coords.length === 0) return;
+
+        if (polyline) {
+            polyline.remove();
+        }
+
+        polyline = L.polyline(coords, {
+            color: getColor(weatherState),
+            weight: 5,
+            opacity: 0.8,
+            lineCap: 'round'
+        }).addTo(map);
+
+        // Auto-Zoom to new route
+        map.fitBounds(polyline.getBounds(), { 
+            padding: [50, 50],
+            animate: true
+        });
+    }
+
+    $effect(() => {
+        // Read latLngList to trigger update when it changes
+        latLngList; 
+        updateRoute();
+    });
+
+    $effect(() => {
+        if (polyline) {             
+            polyline.setStyle({
+                color: getColor(weatherState),
+            });
         }
     });
 
@@ -64,14 +92,6 @@
         polyline?.remove();
         polyline = undefined;
     });
-
-    $effect(() => {
-        if (polyline) { 
-            polyline.setStyle({
-                color: weatherState > 60 ? 'red' : weatherState > 20 ? 'blue' : 'green',
-            });
-        }
-    })
 </script>
 
 <div bind:this={polylineElement}>

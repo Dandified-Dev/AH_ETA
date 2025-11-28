@@ -2,11 +2,9 @@
     import { onMount, onDestroy, getContext, setContext } from 'svelte';
     import L from 'leaflet';
 
-    export let width: number;
-    export let height: number;
-    export let latLng: L.LatLngExpression;
+    const { latLng, width, height } = $props();
 
-    let marker:L.Marker | undefined;
+    let marker = $state<L.Marker | undefined>(undefined);
     let markerElement: HTMLDivElement;
 
     const { getMap }: { getMap: () => L.Map | undefined } = getContext('map');
@@ -28,9 +26,15 @@
         }
     });
 
+    $effect(() => {
+        if (marker) {
+            marker.setLatLng(latLng);
+        }
+    });
+
     onDestroy(() => {
-    marker?.remove();
-    marker = undefined;
+        marker?.remove();
+        marker = undefined;
     });
 </script>
 
