@@ -2,9 +2,9 @@
     import { onMount, onDestroy, getContext, setContext } from 'svelte';
     import L from 'leaflet';
 
-    export let latLngList: Array<L.LatLngExpression>;
+    const { latLngList, weatherState} = $props();
 
-    let polyline:L.Polyline | undefined;
+    let polyline = $state<L.Polyline | undefined>(undefined);
     let polylineElement: HTMLDivElement;
 
     const { getMap }: { getMap: () => L.Map | undefined } = getContext('map');
@@ -49,9 +49,11 @@
     onMount(async () => {
         if (map) {
             const coords = await getRouteData();
+            console.log(weatherState);
+            
             
             polyline = L.polyline(coords, {
-                color: 'blue',
+                color: weatherState > 60 ? 'darkblue' : weatherState > 20 ? 'blue' : 'green',
                 weight: 4,
                 opacity: 0.7,
             }).addTo(map);
@@ -59,9 +61,17 @@
     });
 
     onDestroy(() => {
-    polyline?.remove();
-    polyline = undefined;
+        polyline?.remove();
+        polyline = undefined;
     });
+
+    $effect(() => {
+        if (polyline) { 
+            polyline.setStyle({
+                color: weatherState > 60 ? 'red' : weatherState > 20 ? 'blue' : 'green',
+            });
+        }
+    })
 </script>
 
 <div bind:this={polylineElement}>

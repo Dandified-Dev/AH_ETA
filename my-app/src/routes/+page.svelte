@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Card, CardContent, CardHeader, CardTitle } from "$lib/components/ui/card";
+  import { Slider } from "$lib/components/ui/slider/index.js";
   import { CloudRain, Clock, AlertTriangle } from "lucide-svelte";
   import '../app.css';
   import type { LatLngExpression } from 'leaflet';
@@ -7,6 +8,8 @@
   import Marker from '$lib/components/Marker.svelte';
 	import Popup from '$lib/components/Popup.svelte';
 	import Polyline from '$lib/components/Polyline.svelte';
+
+  let weatherState = $state(30);
 
   const initialView: LatLngExpression = [52.435362, 4.816222]; // Ahold Delhaize Head Office
   const markerIcons: Array<string> = [
@@ -41,14 +44,16 @@
     <Card>
       <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle class="text-sm font-medium text-muted-foreground">Weersomstandigheden</CardTitle>
-        <CloudRain class="h-4 w-4 text-blue-500" />
+        <CloudRain class="h-4 w-4 {weatherState > 50 ? 'text-blue-500' : 'text-gray-300'}" />
       </CardHeader>
       <CardContent>
-        <div class="text-2xl font-bold">Regenachtig</div>
-        <p class="text-xs text-muted-foreground">80% intensiteit</p>
+        <div class="text-2xl font-bold">
+          {weatherState > 60 ? 'Zware Regen' : weatherState > 20 ? 'Lichte Regen' : 'Zonnig'}
+        </div>
+        <p class="text-xs text-muted-foreground mb-4">{weatherState}% intensiteit</p>
+        <Slider bind:value={weatherState} type="single" max={100} step={1} class="w-full" />
       </CardContent>
     </Card>
-
     <Card>
       <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle class="text-sm font-medium text-muted-foreground">Verwachte Aankomst</CardTitle>
@@ -79,7 +84,7 @@
             <Popup>{description}</Popup>
           </Marker>
         {/each}
-        <Polyline latLngList={markers.map(marker => marker.latLng)} />
+        <Polyline latLngList={markers.map(marker => marker.latLng)} weatherState={weatherState} />
       </Leaflet>
     </div>
 </div>
