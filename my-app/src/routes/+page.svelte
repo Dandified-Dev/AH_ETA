@@ -71,7 +71,7 @@
     </Card>
 
   </div>
-    <div class="w-full flex-1">
+    <div class="w-full flex-1 min-h-[400px]">
       <Leaflet view={initialView} zoom={10} >
         {#each markers as { latLng, icon, description }}
           <Marker {latLng} width={40} height={40}>
