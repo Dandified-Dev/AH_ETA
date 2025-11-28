@@ -10,8 +10,8 @@
 
   const initialView: LatLngExpression = [52.435362, 4.816222]; // Ahold Delhaize Head Office
   const markerIcons: Array<string> = [
-    'src/lib/assets/office.svg',
-    'src/lib/assets/store.svg'
+    '/icons/office.svg',
+    '/icons/store.svg'
   ]; 
   const markerLocations: Array<LatLngExpression> = [
     [52.435362, 4.816222],
