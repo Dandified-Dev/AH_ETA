@@ -72,9 +72,9 @@
 
 <Toaster position="top-center" richColors />
 
-<div class="flex flex-1 flex-col gap-6 p-6 h-full bg-slate-50">
+<div class="flex flex-1 flex-col gap-6 p-6 h-full">
   
-  <div class="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl border shadow-sm gap-4">
+  <div class="flex flex-col md:flex-row justify-between items-center p-4 rounded-xl border shadow-sm gap-4">
     <div class="flex items-center gap-3 text-[#00AFE1] font-bold text-xl">
         <Truck class="h-8 w-8" /> 
         <span>AH Transport Control</span>
@@ -114,7 +114,7 @@
         <CardTitle class="text-sm font-medium text-muted-foreground">Verwachte Aankomst</CardTitle>
         <Clock class="h-4 w-4 text-ah-blue" /> </CardHeader>
       <CardContent>
-        <div class="text-4xl font-bold text-gray-900">{formatTime(totalTime)}</div>
+        <div class="text-4xl font-bold">{formatTime(totalTime)}</div>
         <p class="text-xs text-muted-foreground">Basisreistijd: {currentRoute.baseTime} min</p>
       </CardContent>
     </Card>
@@ -136,7 +136,7 @@
 
   </div>
 
-  <div class="w-full flex-1 min-h-[400px] rounded-xl overflow-hidden border shadow-sm bg-white">
+  <div class="w-full flex-1 min-h-[400px] rounded-xl overflow-hidden border shadow-sm ">
     <Leaflet view={currentRoute.start} zoom={10} >     
       {#each currentMarkers as { latLng, icon, description }}
         <Marker {latLng} width={40} height={40}>
